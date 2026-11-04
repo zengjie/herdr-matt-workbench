@@ -1,0 +1,6 @@
+.DS_Store
+*.error
+# Local visual QA captures; commit selected evidence explicitly when needed.
+docs/design/*.png
+# Throwaway prototype lives on prototype/unified-workspace.
+docs/design/matt-workbench-prototype.html
