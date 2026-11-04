@@ -2,7 +2,7 @@
 
 文档状态：实施 Spec；测试边界已由用户确认。发布目标为本仓库 GitHub Issues。
 发布标签：`ready-for-agent`。GitHub issue 是后续更新与工作项关联的权威记录。
-设计依据：统一工作区 v0.4、工作流启用 ADR 与 E 原型；A–D 为探索记录。
+设计依据：统一工作区 v0.5、工作流启用 ADR 与 E 原型；A–D 为探索记录。
 
 ## Problem Statement
 
@@ -23,7 +23,7 @@
 
 Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，不启动本项目的对话 Agent 或调度。Workspace 由 Herdr Space 与明确绑定的固定工作目录界定；Effort 是其中围绕目标组织的工作集合，二者不等同。
 
-实现一个 Herdr 原生 layout 与相应 mods，提供同一个 Effort 的“对话、任务、结果”三个视图。默认显示当前进展与下一步；只有需要人工判断的决策、验收和阻塞进入“需要你”。运行记录、模型配置、后台事件和技术证据按需展开。
+实现一个 Herdr 原生 layout 与相应 mods，以同一个 Effort 的对话为默认入口。默认显示简短进展；需要人工判断的提问、验收和阻塞直接呈现为对话中的待处理卡片。任务列表、结果预览和证据保留为按需打开的面板，不设置常驻的任务与结果页签。运行记录、模型配置、后台事件和技术证据按需展开。
 
 在启用 Matt 的工作区中，用户通过一个独立主会话的对话 Agent 交流。它读取共同事实，将清晰、已授权的诉求转译为指向明确工作项和运行的请求。唯一 CoS 负责依赖、认领、执行协调与集成，不再承担日常前台沟通。操作桥负责可靠传递、持久记录和恢复核对，不新增调度策略。
 
@@ -34,7 +34,7 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 ## User Stories
 
 1. As a developer, I want a unified view for an Effort in its enabled workspace, so that I can understand its goal, work and evidence without assembling them myself.
-2. As a developer, I want only conversation, tasks and results as the main views, so that routine navigation stays simple.
+2. As a developer, I want conversation and actionable cards as my default view, with tasks and evidence available on demand, so that routine work does not require switching pages.
 3. As a developer, I want a short progress summary and a clear next action, so that I know what to do when I return.
 4. As a developer, I want a dedicated dialogue Agent, so that I can express intent without choosing an execution Agent first.
 5. As a developer, I want the dialogue Agent to retrieve current project facts, so that its answers reflect actual work rather than remembered guesses.
@@ -69,7 +69,7 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 34. As a developer, I want the preview, diff, environment and test data identified, so that I can reproduce the displayed behavior.
 35. As a developer, I want verification commands and output available, so that a success label has inspectable evidence.
 36. As a developer, I want independent Standards and Spec reports on the same range, so that style compliance cannot substitute for requirement coverage.
-37. As a developer, I want acceptance actions at the top of the result, so that I can act without searching through logs.
+37. As a developer, I want version-bound acceptance cards directly in conversation, so that I can inspect evidence, accept or request changes without finding a separate results page.
 38. As a developer, I want to accept, request changes or defer acceptance, so that my decision is explicit.
 39. As a developer, I want feedback tied to its version and location, so that the Worker can understand the expected and observed behavior.
 40. As a developer, I want rework to return a new result for review, so that old approval cannot silently apply to revised code.
@@ -109,9 +109,9 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 
 1. **实现交付物。** 构建个人 Herdr layout、所需的原生 mods，以及一个承载运行器连接与可靠操作的本地进程。复用现有终端、会话定位和原生交互组件；不直接移植 HTML/CSS，不重写 Herdr 终端。新增模块以统一工作区、操作桥与两个运行器接入为边界，不建立通用插件平台。
 
-2. **主布局。** 顶部展示 Effort 目标、简短进展与“需要你”；主区仅保留对话、任务、结果三个视图。桌面复用 Space 导航，在 Matt 工作区内选择 Effort；窄窗口收为选择器。日志、请求编号、运行配置和代码详情放入可关闭的按需面板。不得把 A–E 变体选择器或原型故障按钮带进正式产品。
+2. **主布局。** 保留现有布局框架与显式进入/退出方式，默认主区只呈现对话、简短进展与待处理卡片；不常驻任务/结果页签或重复的“需要你”入口。任务列表通过一个按需入口打开，结果与证据从具体卡片或任务打开；关闭面板返回同一对话并保留草稿。桌面复用 Space 导航，在 Matt 工作区内选择 Effort；窄窗口收为选择器。日志、请求编号、运行配置和代码详情放入可关闭的按需面板。不得把 A–E 变体选择器或原型故障按钮带进正式产品。
 
-3. **统一投影与事实归属。** 三个视图读取同一 Effort 状态投影。tracker 拥有原始工作项及依赖语义，git 拥有版本事实，运行器拥有会话与轮次事实，检查器拥有验证结果，用户拥有人工作出的决策与验收。操作记录保存请求及回执。UI 偏好不能充当任务锁，Agent 对话记忆不能成为任务数据库。
+3. **统一投影与事实归属。** 对话、待处理卡片与按需任务/证据面板读取同一 Effort 状态投影。tracker 拥有原始工作项及依赖语义，git 拥有版本事实，运行器拥有会话与轮次事实，检查器拥有验证结果，用户拥有人工作出的决策与验收。操作记录保存请求及回执。UI 偏好不能充当任务锁，Agent 对话记忆不能成为任务数据库。
 
 4. **身份与隔离。** Workspace 以机器、稳定 Space 身份及显式固定工作目录绑定；目录按机器规范化，不以 live cwd 或显示名称作为身份。同一仓库的不同 worktree 可独立选择工作流。Effort 以本机、规范化仓库根目录和显式工作集合身份绑定；工作项、Session、run、terminal、请求和证据版本分别有稳定身份。不要通过名称或目录字符串前缀猜测 worktree 归属。Effort 切换隔离草稿、讨论对象、阅读选择、未决问题、配置草稿和异步响应；过期响应不能覆盖新选中的 Effort。
 
@@ -153,7 +153,7 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 
 23. **实际配置与能力限制。** 保存请求的运行器、模型标识/别名、思考强度和运行侧实际解析结果及来源。能力不可用时显式报告，不能静默降档或换模型；运行器报告实际降档时保留原因。跨提供商档位名不代表同等计算量。自动委派工作流与普通思考强度分开，首版不默认启用；模型选择不扩大工具或操作权限。
 
-24. **可访问性与渐进展示。** 窄窗口下主操作、项目选择和输入仍可达，代码与日志在自己的阅读区域滚动，不撑宽页面。抽屉支持键盘导航、焦点管理、Escape 关闭和回到原操作位置；状态不能只靠颜色区分。后台更新不得收起正在编辑的反馈或丢失其选区。日志或 token 等非决策信息不进入默认主屏。
+24. **可访问性与渐进展示。** 人工决策直接在卡片回答；验收卡片明确任务与版本，提供预览/证据、通过、要求修改和稍后处理。通过后由 CoS 推进已授权的集成验证，不增加手动“准备候选”确认；集成失败或需要用户决策时再显示待处理事项。纠偏与继续可经对话入口发起，仍须明确绑定操作目标并依据回执显示状态。 窄窗口下主操作、项目选择和输入仍可达，代码与日志在自己的阅读区域滚动，不撑宽页面。抽屉支持键盘导航、焦点管理、Escape 关闭和回到原操作位置；状态不能只靠颜色区分。后台更新不得收起正在编辑的反馈或丢失其选区。日志或 token 等非决策信息不进入默认主屏。
 
 25. **启用范围。** 默认保留原工作台，由用户对 Workspace 显式启用 Matt。非 Matt Workspace 不启动本项目的对话 Agent、CoS 或调度，不建设通用 Agent 工作台。终端 cd 不改变固定目录绑定或派工目标。启用状态与绑定必须持久保存。
 
@@ -186,6 +186,7 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 |---|---|---|
 | 一个小修复 | 对话发出明确小任务，沿用默认 | 一位真实 Worker、正确工作目录、真实 diff 与验证证据；无需配置完整编队 |
 | 并行依赖 | A/B 同时执行，C 依赖二者 | 独立 worktree；Agent done 或只验收 A 均不启动 C；满足完成条件后 C 使用已验证基线 |
+| 默认日常入口 | 打开 Matt，收到问题、结果，展开任务或证据后关闭 | 无常驻任务/结果页签；卡片直接决策、验收或返修；返回原对话，草稿与目标保持；通过后集成仍须实际验证 |
 | 输入与通知 | 输入草稿、选择文字时连续到达后台事件 | 文本、焦点、选区保留；消息边界独立；阅读视图不被抢占 |
 | 回复中的新输入 | 第一条消息仍在回复时再发一条 | 新输入按序排队；不会和事件拼为同一消息；明确中断另有回执 |
 | 人工决策 | Worker 提问，Agent 读取事件后用户再回答 | 未回答事项仍可见；回答有来源记录；无关工作继续 |
@@ -202,7 +203,6 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 | Effort 隔离 | 对不同 Effort 留草稿并切换，期间到达旧响应 | 草稿、焦点、阅读位置和待办各自恢复；旧异步结果不覆盖当前工作 |
 | 原生可用性 | 真实 Herdr 窄窗口、键盘打开/关闭抽屉 | 主操作和输入可达；焦点正确；细节不撑宽主区；状态有文字说明 |
 | 完成语义 | 所有任务本地验收与集成通过 | 只声明本项目已达成的完成条件；不显示未实际运行的 PR、CI 或发布成功 |
-
 | 工作流独立选择 | 同仓库两个 worktree 分别启用与不启用 Matt，终端切换 cwd | 配置相互独立；普通 Space 无新增 Agent；派工仍指向固定绑定目录 |
 | 显式布局切换 | 进入 Matt 后选择普通 Space，再返回原工作台 | 普通终端可用，Matt 面板隐藏；Space 切换不触发全窗口 layout 替换 |
 | 重复入口 | 同机器同固定目录由第二个 Space 启用 | 定位已有入口，无第二套调度与重复运行；Worker worktree 保持原归属 |
@@ -239,12 +239,12 @@ Matt 按 Workspace 显式启用，其他 Workspace 保留现有开发方式，�
 
 ### 设计来源与优先顺序
 
-- [统一工作区 v0.4 基线](./2026-11-04-unified-workspace-baseline.md)：当前产品行为、责任和范围依据。
+- [统一工作区 v0.5 基线](./2026-11-04-unified-workspace-baseline.md)：当前产品行为、责任和范围依据。
 - [工作流按工作区启用 ADR](../adr/0001-opt-in-matt-workflow.md)：工作流选择、窗口布局、收尾恢复及入口归属。
-- [E 可交互原型](https://github.com/zengjie/herdr-matt-workbench/blob/prototype/unified-workspace/docs/design/matt-workbench-prototype.html?variant=E)：统一状态、按需展示、纠偏、返修、恢复与轻量路径的交互依据；不作为生产实现。
+- [E 可交互原型](https://github.com/zengjie/herdr-matt-workbench/blob/prototype/unified-workspace/docs/design/matt-workbench-prototype.html?variant=E)：默认对话与待处理卡片、按需任务/证据、纠偏、返修、恢复与轻量路径的交互依据；不作为生产实现。
 - [日常开发审查](./2026-11-04-daily-development-review.md)：当前改进所回应的问题与验证场景。
 - [角色与 Agent 选择研究](./2026-11-04-agent-role-selection.md)：候选配置和运行器能力研究快照，不是永久模型目录或账号授权。
 - [系统设计与 Matt SDLC 依据](./2026-11-04-matt-herdr-system-design.md)：SDLC、平台接口、领域语义与历史推导；其中早期只读方案已被 v0.3 替代。
 - [项目领域术语](../../GLOSSARY.md)：Effort、Implementation Ticket、Decision Ticket、Frontier、Session、Phase、Phase Boundary、Context Pointer 与 Stage Profile 的含义。
 
-本次引用原型的 SHA-256 为 `c533e0a3b818e48c26c0bd82a24eb8313b115e592b008b9b5d300f932a5da189`。原型保存在本仓库 `prototype/unified-workspace` 分支。后续实现可以改变内部结构，但必须保持本 spec 声明的用户行为与操作约束。
+本次引用原型的 SHA-256 为 `37d37c319ec95350c0a039fe8bba5517602dbd348114b505c86ea5e51ead1c17`。原型保存在本仓库 `prototype/unified-workspace` 分支。默认地址展示日常界面，追加 `&lab=1` 才显示模拟回执、故障、完整状态与历史变体入口。自由输入仍为预设回复，不代表接入了真实的意图识别与执行。后续实现可以改变内部结构，但必须保持本 spec 声明的用户行为与操作约束。
